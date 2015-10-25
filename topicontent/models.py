@@ -38,20 +38,20 @@ Topicontents = TopicontentManager
 
 class Topicontent(models.Model):
     ARTICLE_STATUS = (
-        (0, '草稿'),
-        (1, '发布'),
-        (2, '隐藏'),
+        ('0', '草稿'),
+        ('1', '发布'),
+        ('2', '隐藏'),
     )
     title = models.CharField(max_length=40, verbose_name="标题",)
     article = models.TextField(verbose_name="正文")
     author = models.ForeignKey(User, verbose_name="作者")
     cover_image = models.ImageField(verbose_name="封面图片", upload_to="/media/topic/cover/")
-    article_status = models.CharField(verbose_name="状态", choices=ARTICLE_STATUS, blank=True)
+    article_status = models.CharField(max_length=1, verbose_name="状态", choices=ARTICLE_STATUS, blank=True)
     create_time = models.DateTimeField(verbose_name="创建时间", blank=True)
     update_time = models.DateTimeField(verbose_name='更新时间', blank=True)
     label_category = models.ManyToManyField(Topicategory, verbose_name="标签", blank=True)
     comment_count = models.IntegerField(blank=True, null=True, default=0)
-    star_count = models.IntergerField(blank=True, null=True, default=0)
+    star_count = models.IntegerField(blank=True, null=True, default=0)
     collect_count = models.IntegerField(blank=True, null=True, default=0)
 
     objects = Topicontents
@@ -70,8 +70,9 @@ class Topicomment(models.Model):
     author = models.ForeignKey(User)
     content = GenericForeignKey('content_type', 'object_id')
     comment_time = models.DateTimeField()
-    status = models.IntegerField(max_length=1, blank=True, null=True)
-    star_count = models.IntergerField(blank=True, null=True, default=0)
+    star_count = models.PositiveIntegerField(blank=True, null=True, default=0)
+    status = models.IntegerField(blank=True, null=True)
+
     objects = Topicomments
 
 class CollectionsManager(models.Manager):
