@@ -119,7 +119,7 @@ class UserinfoView(generics.RetrieveUpdateAPIView):
 
     @login_required
     def put(self, request, *args, **kwargs):
-        if request.user.id == kwargs.get('pk'):
+        if str(request.user.id) == str(kwargs.get('pk')):
             return self.update(request, *args, **kwargs)
         else:
             return Response(status.HTTP_403_FORBIDDEN)
