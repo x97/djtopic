@@ -15,11 +15,19 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
+
 import tuser.urls
+import topicontent.urls
+
 from .views import index
 urlpatterns = [
+    url(r'^(?P<path>favicon\.ico)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name="favicon"),
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    #
     url(r'^admin/', include(admin.site.urls)),
     url('^api/$', index),
     url('^$', index),
-    url(r'^api/user/', include(tuser.urls))
+    url(r'^api/user/', include(tuser.urls)),
+    url(r'^api/topic/', include(topicontent.urls))
 ]

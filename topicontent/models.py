@@ -17,6 +17,9 @@ class Topicategory(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = '标签'
 
+    def __str__(self):
+        return self.label
+
 class TopicontentManager(models.Manager):
 
     def topic_modify(self, user):
@@ -45,10 +48,10 @@ class Topicontent(models.Model):
     title = models.CharField(max_length=40, verbose_name="标题",)
     article = models.TextField(verbose_name="正文")
     author = models.ForeignKey(User, verbose_name="作者")
-    cover_image = models.ImageField(verbose_name="封面图片", upload_to="/media/topic/cover/")
+    cover_image = models.ImageField(verbose_name="封面图片")
     article_status = models.CharField(max_length=1, verbose_name="状态", choices=ARTICLE_STATUS, blank=True)
-    create_time = models.DateTimeField(verbose_name="创建时间", blank=True)
-    update_time = models.DateTimeField(verbose_name='更新时间', blank=True)
+    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True, null=True)
+    update_time = models.DateTimeField(verbose_name='更新时间', blank=True, null=True)
     label_category = models.ManyToManyField(Topicategory, verbose_name="标签", blank=True)
     comment_count = models.IntegerField(blank=True, null=True, default=0)
     star_count = models.IntegerField(blank=True, null=True, default=0)

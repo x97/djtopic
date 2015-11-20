@@ -37,7 +37,7 @@ class UserCreateuserializers(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tuser
-        fields = ('username', 'email', 'password',)
+        fields = ('pk', 'username', 'email', 'password',)
 
     def validate_username(self, value):
         if value:
