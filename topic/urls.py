@@ -20,7 +20,7 @@ from django.conf import settings
 import tuser.urls
 import topicontent.urls
 
-from .views import index
+from .views import index, login
 urlpatterns = [
     url(r'^(?P<path>favicon\.ico)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name="favicon"),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url('^api/$', index),
     url('^$', index),
+    url('^login$', login),
     url(r'^api/user/', include(tuser.urls)),
     url(r'^api/topic/', include(topicontent.urls))
 ]

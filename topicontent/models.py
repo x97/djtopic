@@ -58,6 +58,8 @@ class Topicontent(models.Model):
     collect_count = models.IntegerField(blank=True, null=True, default=0)
 
     objects = Topicontents
+    class Meta:
+        verbose_name = verbose_name_plural = '话题'
 
 class TopicommentManager(models.Manager):
 
@@ -67,16 +69,18 @@ class TopicommentManager(models.Manager):
 Topicomments = TopicommentManager
 
 class Topicomment(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType,)
     object_id = models.PositiveIntegerField()
     author = models.ForeignKey(User)
     comment = GenericForeignKey('content_type', 'object_id')
-    content = models.CharField(max_length='150', null=True)
+    content = models.CharField(max_length=150, null=True)
     comment_time = models.DateTimeField(auto_now_add=True, blank=True)
     star_count = models.PositiveIntegerField(blank=True, null=True, default=0)
     status = models.IntegerField(blank=True, null=True)
-
     objects = Topicomments
+
+    class Meta:
+        verbose_name = verbose_name_plural = '评论'
 
 class CollectionsManager(models.Manager):
     def get_collections(self, user):

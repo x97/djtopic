@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
 from . import models
 from . import permission
@@ -47,6 +48,13 @@ class TopicommentSerializers(serializers.ModelSerializer):
         validated_data['author_id'] = self._context['request'].user.pk
         return super(TopicommentSerializers, self).create(validated_data)
 
+class TopicommentDetailSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Topicomment
+        fields = (
+            'pk', 'content_type', 'object_id', 'content',
+        )
 
 class TopicommentListSerializers(serializers.ModelSerializer):
 
@@ -66,23 +74,6 @@ class CreateTopicSerializers(serializers.ModelSerializer):
         validated_data['author_id'] = self._context['request'].user.pk
         return super(CreateTopicSerializers, self).create(validated_data)
 
-
-
-class UserinfoGetserializers(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Tuser
-        fields = ('pk', 'username', 'email', 'avatar', 'sex', 'nickname',
-                  'country', 'province', 'city', 'birthday',
-                  'followers_count', 'grade')
-
-class UserinfoCreateserializers(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Tuser
-        fields = ('email', 'avatar', 'sex', 'nickname',
-                  'country', 'province', 'city', 'birthday',)
-
 class ListopicView(generics.ListAPIView):
     serializer_class = TopicSerializers
     def get_queryset(self):
@@ -94,11 +85,11 @@ class ListopicView(generics.ListAPIView):
                 return models.Topicontent.objects.filter(author=self.request.user)
             else:
                 raise PermissionDenied
+
 class CreatetopicView(generics.CreateAPIView):
     serializer_class = CreateTopicSerializers
     permission_classes = (permissions.IsAuthenticated,)
     # queryset = models.Topicontent.objects.all()
-
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return TopicSerializers
@@ -118,11 +109,21 @@ class TopicView(generics.RetrieveAPIView, generics.DestroyAPIView,
 
 class TopicommentCreate(generics.CreateAPIView):
     serializer_class = TopicommentSerializers
-    permissions = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, permission.RightContenttypePermission)
+    create_serializer_class = TopicommentListSerializers
+
+
+def get_contenttype(model):
+    return ContentType.objects.get_for_model(model).pk
 
 class TopicommentList(generics.ListAPIView):
     serializer_class = TopicommentListSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
-        return models.Topicomment.objects.all()
+        object_id = self.request.GET.get('object_id')
+        if object_id:
+            return models.Topicomment.objects.filter(
+                content_type=get_contenttype(models.Topicontent), object_id=object_id)
+        else:
+            return None
