@@ -69,10 +69,10 @@ Topicomments = TopicommentManager
 class Topicomment(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    review_comment = models.ForeignKey('self', blank=True, null=True)
     author = models.ForeignKey(User)
-    content = GenericForeignKey('content_type', 'object_id')
-    comment_time = models.DateTimeField()
+    comment = GenericForeignKey('content_type', 'object_id')
+    content = models.CharField(max_length='150', null=True)
+    comment_time = models.DateTimeField(auto_now_add=True, blank=True)
     star_count = models.PositiveIntegerField(blank=True, null=True, default=0)
     status = models.IntegerField(blank=True, null=True)
 
