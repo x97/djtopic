@@ -29,9 +29,7 @@ class UserSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tuser
-        fields = ('pk', 'username', 'email', 'avatar', 'sex',
-                  'country', 'province', 'city', 'birthday',
-                  'followers_count', 'grade')
+        fields = "__all__"
 
 class UserCreateuserializers(serializers.ModelSerializer):
 

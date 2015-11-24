@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
-from tuser.models import *
+from tuser.models import Tuser
 # Create your models here.
 class TopicategoryManager(models.Manager):
     pass
@@ -37,6 +37,18 @@ class TopicontentManager(models.Manager):
     def best_topic_comments(self, topic_id):
         return Topicomment.filter(content_type=Topicontent, object_id=topic_id, status=2)
 
+    def collect(self, instance):
+        instance.collect_count = instance.collect_count + 1
+        instance.save()
+
+    def comment(self, instance):
+        instance.comment_count = instance.comment_count + 1
+        instance.save()
+
+    def star(self, instance):
+        instance.star_count = instance.star_count + 1
+        instance.save()
+
 Topicontents = TopicontentManager
 
 class Topicontent(models.Model):
@@ -44,10 +56,11 @@ class Topicontent(models.Model):
         ('0', '草稿'),
         ('1', '发布'),
         ('2', '隐藏'),
+        ('3', '屏蔽'),
     )
     title = models.CharField(max_length=40, verbose_name="标题",)
     article = models.TextField(verbose_name="正文")
-    author = models.ForeignKey(User, verbose_name="作者")
+    author = models.ForeignKey(Tuser, verbose_name="作者")
     cover_image = models.ImageField(verbose_name="封面图片")
     article_status = models.CharField(max_length=1, verbose_name="状态", choices=ARTICLE_STATUS, blank=True)
     create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True, null=True)
@@ -61,6 +74,9 @@ class Topicontent(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = '话题'
 
+    def __str__(self):
+        return self.title
+
 class TopicommentManager(models.Manager):
 
     def set_best_comment(self, id):
@@ -68,27 +84,60 @@ class TopicommentManager(models.Manager):
 
 Topicomments = TopicommentManager
 
+# class Topicomment(models.Model):
+#     content_type = models.ForeignKey(ContentType)
+#     object_id = models.PositiveIntegerField()
+#     origin_content_type = models.ForeignKey(ContentType, related_name='origin_comment', null=True)
+#     origin_object_id = models.PositiveIntegerField(null=True)
+#     author = models.ForeignKey(Tuser)
+#     comment = GenericForeignKey('content_type', 'object_id')
+#     comment_origin = GenericForeignKey('origin_content_type', 'origin_object_id')
+#     content = models.CharField(max_length=150, null=True)
+#     comment_time = models.DateTimeField(auto_now_add=True, blank=True)
+#     star_count = models.PositiveIntegerField(blank=True, null=True, default=0)
+#     status = models.IntegerField(blank=True, null=True, default=0)
+#     objects = Topicomments
+#
+#     class Meta:
+#         verbose_name = verbose_name_plural = '评论'
+#
+#     def __str__(self):
+#         return self.content
+
 class Topicomment(models.Model):
-    content_type = models.ForeignKey(ContentType,)
-    object_id = models.PositiveIntegerField()
-    author = models.ForeignKey(User)
-    comment = GenericForeignKey('content_type', 'object_id')
+
+    author = models.ForeignKey(Tuser)
     content = models.CharField(max_length=150, null=True)
-    comment_time = models.DateTimeField(auto_now_add=True, blank=True)
+    topic = models.ForeignKey(Topicontent, blank=True, null=True, verbose_name="话题")
+    review = models.ForeignKey('self', blank=True, null=True, verbose_name="评论")
     star_count = models.PositiveIntegerField(blank=True, null=True, default=0)
-    status = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, default=0)
+    create_time = models.DateTimeField(blank=True, null=True)
     objects = Topicomments
 
     class Meta:
         verbose_name = verbose_name_plural = '评论'
 
+    def __str__(self):
+        return self.content
 class CollectionsManager(models.Manager):
     def get_collections(self, user):
         return self.filter(user=user)
 
 Collections = CollectionsManager
-class Collection(models.Model):
-    user = models.ForeignKey(User)
-    topic = models.ForeignKey(Topicontent)
-    collect_time = models.DateTimeField(auto_now_add=True)
+class TopicRelation(models.Model):
+
+    RELATION = (
+        (0, "收藏"),
+        (1, "点赞"),
+    )
+    user = models.ForeignKey(Tuser, verbose_name="用户")
+    topic = models.ForeignKey(Topicontent, verbose_name="话题")
+    collect_time = models.DateTimeField(auto_now_add=True, verbose_name="收藏时间")
+    relation = models.IntegerField(default=0, choices=RELATION, verbose_name="关系")
+    status = models.IntegerField(default=1, verbose_name="状态")
     objects = Collections
+
+    class Meta:
+        verbose_name = verbose_name_plural = '话题关系'
+# class StaredTopic(models.M)
