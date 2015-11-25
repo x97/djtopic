@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 # from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
+
 
 from django.db.models import F
 from tuser.models import Tuser
@@ -36,7 +38,7 @@ class TopicontentManager(models.Manager):
         return Topicomment.filter(content_type=Topicontent, object_id=topic_id)
 
     def best_topic_comments(self, topic_id):
-        return Topicomment.filter(content_type=Topicontent, object_id=topic_id, status=2)
+        return Topicomment.filter(content_type=Topicontent, object_id=topic_id, status=1)
 
     def collect(self, instance):
         self.filter(pk=instance.pk).update(collect_count=F('collect_count')+1)
@@ -66,12 +68,34 @@ class Topicontent(models.Model):
     update_time = models.DateTimeField(verbose_name='更新时间', blank=True, null=True)
     label_category = models.ManyToManyField(Topicategory, verbose_name="标签", blank=True)
     comment_count = models.IntegerField(blank=True, null=True, default=0)
-    star_count = models.IntegerField(blank=True, null=True, default=0)
-    collect_count = models.IntegerField(blank=True, null=True, default=0)
-
+    star_count = models.IntegerField(verbose_name='点赞数', blank=True, null=True, default=0)
+    collect_count = models.IntegerField(verbose_name='收藏数', blank=True, null=True, default=0)
+    status = models.IntegerField(default=0)
     objects = Topicontents
+
+    def admin_article_status(self):
+        status_list = ['草稿', '发布', '隐藏', '屏蔽']
+        return status_list[int(self.article_status)]
+    admin_article_status.short_description = "状态"
+    def setbest(self):
+        return mark_safe('<a class="button" href="%s/set/">加精</a>' % self.id)
+    setbest.allow_tags = True
+    setbest.short_description = '动作'
+
+    def resetbest(self):
+        return mark_safe('<a class="button" href="%s/reset/">取消加精</a>' % self.id)
+    resetbest.allow_tags = True
+    resetbest.short_description = '动作'
+
+    def admin_cover_image(self):
+        if self.cover_image:
+            return '<img height="150" src="/media/%s" />' % self.cover_image
+        return ''
+    admin_cover_image.allow_tags = True
+    admin_cover_image.short_description = '用户照片'
+
     class Meta:
-        verbose_name = verbose_name_plural = '话题'
+        verbose_name = verbose_name_plural = '所有话题'
 
     def __str__(self):
         return self.title
@@ -79,7 +103,7 @@ class Topicontent(models.Model):
 class TopicommentManager(models.Manager):
 
     def set_best_comment(self, id):
-        self.get(id=id).update(status=2)
+        self.get(id=id).update(status=1)
 
 Topicomments = TopicommentManager
 
@@ -119,6 +143,7 @@ class Topicomment(models.Model):
 
     def __str__(self):
         return self.content
+
 class CollectionsManager(models.Manager):
     def get_collections(self, user):
         return self.filter(user=user)
@@ -142,3 +167,17 @@ class TopicRelation(models.Model):
     # def __str__(self):
     #     return self.topic
 # class StaredTopic(models.M)
+
+class ProhibitWord(models.Model):
+    word = models.CharField(max_length=20, verbose_name="关键字")
+
+    class Meta:
+        verbose_name = verbose_name_plural = '禁止关键字'
+
+    def __str__(self):
+        return self.word
+
+class ProxyTopicontent(Topicontent):
+    class Meta:
+        proxy = True
+        verbose_name = verbose_name_plural = '精选话题'

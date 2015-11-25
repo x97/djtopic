@@ -24,6 +24,13 @@ now = timezone.now()
 
 topic = models.Topicontents
 
+def replace_prohibit_word(context):
+    words = models.ProhibitWord.objects.all()
+    for word in words:
+        temp = context.replace(word.word, "*" * len(word.word))
+        context = temp
+    return temp
+
 def get_contentype_name(model):
     return ContentType.objects.get(model=model)
 
@@ -122,6 +129,7 @@ class CreateTopicSerializers(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['update_time'] = now
+        validated_data['article'] = replace_prohibit_word(validated_data['article'])
         validated_data['author_id'] = self._context['request'].user.pk
         return super(CreateTopicSerializers, self).create(validated_data)
 
@@ -131,11 +139,13 @@ class ListopicView(generics.ListAPIView):
         user_id = self.request.GET.get('user_id')
         status = self.request.GET.get("status")
         if user_id:
-            return models.Topicontent.objects.filter(author_id=user_id, article_status=1)
+            return models.Topicontent.objects.filter(author_id=user_id, article_status=1).order_by('create_time')
         if self.request.user and self.request.user.is_authenticated() and status and int(status) != 2:
-            return models.Topicontent.objects.filter(author=self.request.user, article_status=status)
+            return models.Topicontent.objects.filter(author=self.request.user,
+                                                     article_status=status).order_by('create_time')
         else:
-            return models.Topicontent.objects.filter(author=self.request.user, article_status=1)
+            return models.Topicontent.objects.filter(author=self.request.user,
+                                                     article_status=1).order_by('create_time')
         raise PermissionDenied
 
 class CreatetopicView(generics.CreateAPIView):
@@ -146,7 +156,6 @@ class CreatetopicView(generics.CreateAPIView):
         if self.request.method == 'GET':
             return TopicSerializers
         return self.serializer_class
-
 
 class TopicView(generics.RetrieveAPIView, generics.DestroyAPIView,
                  generics.UpdateAPIView):
@@ -205,11 +214,27 @@ class CollectionList(generics.ListAPIView):
     permissions = (permissions.IsAuthenticated)
 
     def get_queryset(self):
-        return models.TopicRelation.objects.filter(user=self.request.user, relation=0)
+        return models.TopicRelation.objects.filter(user=self.request.user, relation=0).order_by('create_time')
 
 class StarList(generics.ListAPIView):
     serializer_class = CollectionSerializers
     permissions = (permissions.IsAuthenticated)
 
     def get_queryset(self):
-        return models.TopicRelation.objects.filter(user=self.request.user, relation=1)
+        return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('create_time')
+
+# class UserRelationTopicList(generics.ListAPIView):
+#     serializer_class = CollectionSerializers
+#     permissions = (permissions.IsAuthenticated)
+#
+#     def get_queryset(self):
+        return models.Topicontent.objects.filter()
+
+class TopicRecentList(generics.ListAPIView):
+    serializer_class = CollectionSerializers
+    permissions = (permissions.IsAuthenticated)
+
+    def get_queryset(self):
+        return models.Topicontent.objects.filter(status=1).order_by('create_time')
+
+

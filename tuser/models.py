@@ -8,9 +8,12 @@ class TuserManager(models.Manager):
         self.filter(pk=instance.pk).update(followers_count=F('followers_count')+1)
 
     def following(self, instance):
+        print(self.filter(pk=instance.pk))
         self.filter(pk=instance.pk).update(following_count=F('following_count')+1)
 
     def unfollows(self, instance):
+        print(instance.pk)
+        print(self.filter(pk=instance.pk))
         self.filter(pk=instance.pk).update(followers_count=F('followers_count')-1)
 
     def unfollowing(self, instance):

@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import views
 from rest_framework.response import Response
-from rest_framework.exceptions import  NotAcceptable, NotFound
+from rest_framework.exceptions import NotAcceptable, NotFound
 from rest_framework import status
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -21,7 +21,7 @@ class RelationCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['create_time'] = now
         validated_data['user_id'] = self._context['request'].user.pk
-        if validated_data['relation'] == 0:
+        if validated_data['relation'] == 1:
             return super(RelationCreateSerializer, self).create(validated_data)
         instance = super(RelationCreateSerializer, self).create(validated_data)
         tusers.follows(instance.relation_user)
@@ -74,6 +74,7 @@ class RelationCancel(generics.CreateAPIView):  # 取消关注/拉黑
 
     def create(self, request, *args, **kwargs):
         instance = self.get_object()
+        print(instance.relation)
         if instance.relation == 0:
             tusers.unfollows(instance.relation_user)
             tusers.unfollowing(instance.user)
