@@ -3,6 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 # from django.contrib.auth.models import User
 
+from django.db.models import F
 from tuser.models import Tuser
 # Create your models here.
 class TopicategoryManager(models.Manager):
@@ -38,18 +39,16 @@ class TopicontentManager(models.Manager):
         return Topicomment.filter(content_type=Topicontent, object_id=topic_id, status=2)
 
     def collect(self, instance):
-        instance.collect_count = instance.collect_count + 1
-        instance.save()
+        self.filter(pk=instance.pk).update(collect_count=F('collect_count')+1)
 
     def comment(self, instance):
-        instance.comment_count = instance.comment_count + 1
-        instance.save()
+        self.filter(pk=instance.pk).update(comment_count=F('comment_count')+1)
 
     def star(self, instance):
-        instance.star_count = instance.star_count + 1
-        instance.save()
+        self.filter(pk=instance.pk).update(star_count=F('star_count')+1)
 
-Topicontents = TopicontentManager
+
+Topicontents = TopicontentManager()
 
 class Topicontent(models.Model):
     ARTICLE_STATUS = (
@@ -140,4 +139,6 @@ class TopicRelation(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = '话题关系'
+    # def __str__(self):
+    #     return self.topic
 # class StaredTopic(models.M)

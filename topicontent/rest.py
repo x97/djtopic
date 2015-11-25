@@ -22,7 +22,7 @@ import re
 
 now = timezone.now()
 
-topic = models.Topicontents()
+topic = models.Topicontents
 
 def get_contentype_name(model):
     return ContentType.objects.get(model=model)
@@ -78,7 +78,7 @@ class TopicommentListSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = models.Topicomment
-        fields = '__all__'
+        # fields = '__all__'
         depth = 1
 
 class BaseCollectionSerializers(serializers.ModelSerializer):

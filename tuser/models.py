@@ -1,9 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import F
 
 class TuserManager(models.Manager):
-    pass
 
+    def follows(self, instance):
+        self.filter(pk=instance.pk).update(followers_count=F('followers_count')+1)
+
+    def following(self, instance):
+        self.filter(pk=instance.pk).update(following_count=F('following_count')+1)
+
+    def unfollows(self, instance):
+        self.filter(pk=instance.pk).update(followers_count=F('followers_count')-1)
+
+    def unfollowing(self, instance):
+        self.filter(pk=instance.pk).update(following_count=F('following_count')-1)
+
+tusers = TuserManager()
 
 class Tuser(User):
     SEX_CHOICES = (
@@ -21,10 +34,12 @@ class Tuser(User):
     birthday = models.DateField(verbose_name="生日", blank=True, null=True)
     grade = models.IntegerField(verbose_name="等级", blank=True, default=0)
     followers_count = models.IntegerField(verbose_name="粉丝数量", blank=True, default=0)
-    followers_count = models.IntegerField(verbose_name="关注数量", blank=True, default=0)
+    following_count = models.IntegerField(verbose_name="关注数量", blank=True, default=0)
     topic_count = models.IntegerField(verbose_name="话题数量", blank=True, default=0)
     collection_count = models.IntegerField(verbose_name="收藏数量", blank=True, default=0)
 
+    objects = tusers
+
     class Meta:
-        verbose_name = verbose_name_plural = '用户'
+        verbose_name = verbose_name_plural = '用户信息'
 

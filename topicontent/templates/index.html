@@ -7,6 +7,14 @@
     <dd><a href="/api/user/userinfo/1">用户信息</a></dd>
 </dl>
 <dl>
+    <dt><h3>用户关系</h3></dt>
+    <dd><a href="{% url 'relation_create' %}">关系创建</a></dd>
+    <dd><a href="{% url 'relation_cancel' %}">关系取消</a></dd>
+    <dd><a href="{% url 'following' %}">关注列表</a></dd>
+    <dd><a href="{% url 'followers' %}">粉丝列表</a></dd>
+    <dd><a href="{% url 'blacklist' %}">黑名单</a></dd>
+</dl>
+<dl>
     <dt><h3>话题</h3></dt>
     <dd><a href="{% url 'topic_create' %}">创建</a></dd>
     <dd><a href="/api/topic/2">查看/修改/删除</a></dd>
