@@ -214,27 +214,27 @@ class CollectionList(generics.ListAPIView):
     permissions = (permissions.IsAuthenticated)
 
     def get_queryset(self):
-        return models.TopicRelation.objects.filter(user=self.request.user, relation=0).order_by('create_time')
+        return models.TopicRelation.objects.filter(user=self.request.user, relation=0).order_by('collect_time')
 
 class StarList(generics.ListAPIView):
     serializer_class = CollectionSerializers
     permissions = (permissions.IsAuthenticated)
 
     def get_queryset(self):
-        return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('create_time')
+        return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('collect_time')
 
 # class UserRelationTopicList(generics.ListAPIView):
 #     serializer_class = CollectionSerializers
 #     permissions = (permissions.IsAuthenticated)
 #
 #     def get_queryset(self):
-        return models.Topicontent.objects.filter()
+#         return models.Topicontent.objects.filter()
 
 class TopicRecentList(generics.ListAPIView):
-    serializer_class = CollectionSerializers
+    serializer_class = TopicSerializers
     permissions = (permissions.IsAuthenticated)
 
     def get_queryset(self):
-        return models.Topicontent.objects.filter(status=1).order_by('create_time')
+        return models.Topicontent.objects.filter(article_status=1).order_by('create_time')
 
 
