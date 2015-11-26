@@ -142,7 +142,7 @@ class CreateTopicSerializers(serializers.ModelSerializer):
 
 class ListopicView(generics.ListAPIView):
     serializer_class = TopicSerializers
-    parser_classes = StandardResultsSetPagination
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         user_id = self.request.GET.get('user_id')
@@ -152,7 +152,7 @@ class ListopicView(generics.ListAPIView):
         if self.request.user and self.request.user.is_authenticated() and status and int(status) != 2:
             return models.Topicontent.objects.filter(author=self.request.user,
                                                      article_status=status).order_by('create_time')
-        else:
+        elif self.request.user and self.request.user.is_authenticated():
             return models.Topicontent.objects.filter(author=self.request.user,
                                                      article_status=1).order_by('create_time')
         raise PermissionDenied
@@ -220,21 +220,21 @@ class StarCreate(generics.CreateAPIView):
 
 class CollectionList(generics.ListAPIView):
     serializer_class = CollectionSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return models.TopicRelation.objects.filter(user=self.request.user, relation=0).order_by('collect_time')
 
 class StarList(generics.ListAPIView):
     serializer_class = CollectionSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('collect_time')
 
 class BaseTopicList(generics.ListAPIView):
     serializer_class = TopicSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
 
 class UserRelationTopicList(BaseTopicList):
