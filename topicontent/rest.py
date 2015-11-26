@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotAcceptable
 from rest_framework import generics, permissions, filters
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
@@ -15,6 +16,7 @@ from django.db.models import Q
 
 from . import models
 from . import permission
+from trelation.models import Relation
 
 import functools
 import logging
@@ -39,6 +41,11 @@ def get_contentype_id(model):
 
 def get_instance_for_contentype(model, **kwargs):
     return model.get_object_for_this_type(**kwargs)
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
 
 class TopicSerializers(serializers.ModelSerializer):
     class Meta:
@@ -135,6 +142,8 @@ class CreateTopicSerializers(serializers.ModelSerializer):
 
 class ListopicView(generics.ListAPIView):
     serializer_class = TopicSerializers
+    parser_classes = StandardResultsSetPagination
+
     def get_queryset(self):
         user_id = self.request.GET.get('user_id')
         status = self.request.GET.get("status")
@@ -223,18 +232,22 @@ class StarList(generics.ListAPIView):
     def get_queryset(self):
         return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('collect_time')
 
-# class UserRelationTopicList(generics.ListAPIView):
-#     serializer_class = CollectionSerializers
-#     permissions = (permissions.IsAuthenticated)
-#
-#     def get_queryset(self):
-#         return models.Topicontent.objects.filter()
-
-class TopicRecentList(generics.ListAPIView):
+class BaseTopicList(generics.ListAPIView):
     serializer_class = TopicSerializers
     permissions = (permissions.IsAuthenticated)
+    pagination_class = StandardResultsSetPagination
+
+class UserRelationTopicList(BaseTopicList):
+    def get_queryset(self):
+        following = Relation.objects.filter(user_id=self.request.user, relation=0).values('relation_user')
+        return models.Topicontent.objects.filter(article_status=1, author__in=following).order_by('create_time')
+
+class TopicRecentList(BaseTopicList):
 
     def get_queryset(self):
         return models.Topicontent.objects.filter(article_status=1).order_by('create_time')
 
 
+class TopicBestList(BaseTopicList):
+    def get_queryset(self):
+        return models.Topicontent.objects.filter(article_status=1, status=1).order_by('create_time')
