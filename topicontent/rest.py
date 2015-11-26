@@ -68,7 +68,7 @@ class TopicommentSerializers(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['author_id'] = self._context['request'].user.pk
-        validated_data['create_time'] = now
+        validated_data['create_time'] = timezone.now()
         instance = super(TopicommentSerializers, self).create(validated_data)
         topic.comment(instance.topic)
         return instance
@@ -84,7 +84,7 @@ class TopicommentReviewSerializers(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['author_id'] = self._context['request'].user.pk
         validated_data['topic'] = validated_data['review'].topic
-        validated_data['create_time'] = now
+        validated_data['create_time'] = timezone.now()
         instance = super(TopicommentReviewSerializers, self).create(validated_data)
         topic.comment(instance.topic)
         return instance
@@ -103,7 +103,7 @@ class BaseCollectionSerializers(serializers.ModelSerializer):
         fields = ('topic',)
 
     def create(self, validated_data):
-        validated_data['collect_time'] = now
+        validated_data['collect_time'] = timezone.now()
         validated_data['user_id'] = self._context['request'].user.pk
         return super(BaseCollectionSerializers, self).create(validated_data)
 
@@ -136,7 +136,7 @@ class CreateTopicSerializers(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        validated_data['update_time'] = now
+        validated_data['update_time'] = timezone.now()
         validated_data['article'] = replace_prohibit_word(validated_data['article'])
         validated_data['author_id'] = self._context['request'].user.pk
         return super(CreateTopicSerializers, self).create(validated_data)
