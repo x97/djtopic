@@ -19,7 +19,7 @@ class RelationCreateSerializer(serializers.ModelSerializer):
         fields = ('relation_user', 'relation')
 
     def create(self, validated_data):
-        validated_data['create_time'] = now
+        validated_data['create_time'] = timezone.now()
         validated_data['user_id'] = self._context['request'].user.pk
         if validated_data['relation'] == 1:
             return super(RelationCreateSerializer, self).create(validated_data)
