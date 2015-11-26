@@ -220,21 +220,21 @@ class StarCreate(generics.CreateAPIView):
 
 class CollectionList(generics.ListAPIView):
     serializer_class = CollectionSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return models.TopicRelation.objects.filter(user=self.request.user, relation=0).order_by('collect_time')
 
 class StarList(generics.ListAPIView):
     serializer_class = CollectionSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return models.TopicRelation.objects.filter(user=self.request.user, relation=1).order_by('collect_time')
 
 class BaseTopicList(generics.ListAPIView):
     serializer_class = TopicSerializers
-    permissions = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
 
 class UserRelationTopicList(BaseTopicList):
