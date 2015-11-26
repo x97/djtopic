@@ -251,3 +251,10 @@ class TopicRecentList(BaseTopicList):
 class TopicBestList(BaseTopicList):
     def get_queryset(self):
         return models.Topicontent.objects.filter(article_status=1, status=1).order_by('create_time')
+
+class SearchContentList(BaseTopicList):
+    def get_queryset(self):
+        word = self.request.GET.get('word')
+        if word:
+            return models.Topicontent.objects.filter(article_status=1, article__contains=word)
+        raise NotAcceptable("请输入查询内容")
