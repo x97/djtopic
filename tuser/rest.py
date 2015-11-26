@@ -66,7 +66,7 @@ class UserinfoGetserializers(serializers.ModelSerializer):
         model = models.Tuser
         fields = ('pk', 'username', 'email', 'avatar', 'sex', 'nickname',
                   'country', 'province', 'city', 'birthday',
-                  'followers_count', 'grade')
+                  'followers_count','following_count' , 'grade')
 
 class UserinfoCreateserializers(serializers.ModelSerializer):
 

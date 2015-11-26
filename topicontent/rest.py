@@ -142,7 +142,7 @@ class CreateTopicSerializers(serializers.ModelSerializer):
 
 class ListopicView(generics.ListAPIView):
     serializer_class = TopicSerializers
-    parser_classes = StandardResultsSetPagination
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         user_id = self.request.GET.get('user_id')
@@ -152,7 +152,7 @@ class ListopicView(generics.ListAPIView):
         if self.request.user and self.request.user.is_authenticated() and status and int(status) != 2:
             return models.Topicontent.objects.filter(author=self.request.user,
                                                      article_status=status).order_by('create_time')
-        else:
+        elif self.request.user and self.request.user.is_authenticated():
             return models.Topicontent.objects.filter(author=self.request.user,
                                                      article_status=1).order_by('create_time')
         raise PermissionDenied

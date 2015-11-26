@@ -92,7 +92,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'djtopic',
-        'PASSWORD': 'hhxxttxs',
+        'PASSWORD': 'admin123',
         'USER': 'root',
     }
 }
