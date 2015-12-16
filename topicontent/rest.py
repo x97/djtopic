@@ -28,6 +28,7 @@ topic = models.Topicontents
 
 def replace_prohibit_word(context):
     words = models.ProhibitWord.objects.all()
+    temp = context
     for word in words:
         temp = context.replace(word.word, "*" * len(word.word))
         context = temp
@@ -124,7 +125,7 @@ class StarCreateSerializers(BaseCollectionSerializers):
 class CollectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.TopicRelation
-        fields = '__all__'
+        # fields = '__all__'
         depth = 1
 
 class CreateTopicSerializers(serializers.ModelSerializer):
@@ -170,7 +171,7 @@ class TopicView(generics.RetrieveAPIView, generics.DestroyAPIView,
                  generics.UpdateAPIView):
     queryset = models.Topicontent
     serializer_class = CreateTopicSerializers
-    permission_classes = [permission.ISAuthorPermission, ]
+    permission_classes = (permission.ISAuthorPermission, )
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT']:
@@ -234,10 +235,11 @@ class StarList(generics.ListAPIView):
 
 class BaseTopicList(generics.ListAPIView):
     serializer_class = TopicSerializers
-    permission_classes = (permissions.IsAuthenticated,)
+    #permission_classes = (permissions.IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
 
 class UserRelationTopicList(BaseTopicList):
+    permission_classes = (permissions.IsAuthenticated,)
     def get_queryset(self):
         following = Relation.objects.filter(user_id=self.request.user, relation=0).values('relation_user')
         return models.Topicontent.objects.filter(article_status=1, author__in=following).order_by('create_time')
