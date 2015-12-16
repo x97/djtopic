@@ -6,4 +6,4 @@ def index(request):
     return TemplateResponse(request, 'index.html')
 
 def login(request):
-    return TemplateResponse(request, "WEB-/login.html")
+    return TelatempResponse(request, "WEB-/login.html")
